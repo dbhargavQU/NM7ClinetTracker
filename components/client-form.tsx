@@ -109,7 +109,7 @@ export function ClientForm({ client }: { client?: Client }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="monthlyFee">Monthly Fee ($) *</Label>
+            <Label htmlFor="monthlyFee">Monthly Fee (₹) *</Label>
             <Input
               id="monthlyFee"
               type="number"
