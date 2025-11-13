@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  clients Client[]
+
+  @@map("users")
+}
+
+model Client {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  name            String
+  startDate       DateTime  @map("start_date")
+  monthlyFee      Decimal   @map("monthly_fee") @db.Decimal(10, 2)
+  isActive        Boolean   @default(true) @map("is_active")
+  startingWeightKg Float?   @map("starting_weight_kg") @db.DoublePrecision
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutSchedules WorkoutSchedule[]
+  payments        Payment[]
+  progressEntries ProgressEntry[]
+
+  @@map("clients")
+}
+
+model WorkoutSchedule {
+  id          String   @id @default(cuid())
+  clientId    String   @map("client_id")
+  dayOfWeek   Int      @map("day_of_week") // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime   String   @map("start_time") // Format: "HH:mm"
+  endTime     String   @map("end_time") // Format: "HH:mm"
+  location    String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("workout_schedules")
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  clientId String   @map("client_id")
+  month     Int      // 1-12
+  year      Int
+  amount    Decimal  @db.Decimal(10, 2)
+  paidOn    DateTime @map("paid_on")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, month, year])
+  @@map("payments")
+}
+
+model ProgressEntry {
+  id        String   @id @default(cuid())
+  clientId  String   @map("client_id")
+  date      DateTime @db.Date
+  weightKg  Float    @map("weight_kg") @db.DoublePrecision
+  notes     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("progress_entries")
+}
+
