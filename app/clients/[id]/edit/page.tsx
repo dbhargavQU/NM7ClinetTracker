@@ -22,11 +22,17 @@ export default async function EditClientPage({
     notFound()
   }
 
+  // Convert Prisma Decimal to number for ClientForm
+  const clientForForm = {
+    ...client,
+    monthlyFee: Number(client.monthlyFee),
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
         <h1 className="text-3xl font-bold">Edit Client</h1>
-        <ClientForm client={client} />
+        <ClientForm client={clientForForm} />
       </div>
     </Layout>
   )
