@@ -17,14 +17,20 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Find user with case-insensitive email matching
-        const user = await prisma.user.findFirst({
-          where: {
-            email: {
-              equals: credentials.email,
-              mode: 'insensitive',
-            },
-          },
-        })
+        // Use raw query for reliable case-insensitive matching
+        const users = await prisma.$queryRaw<Array<{ id: string; email: string; name: string; password_hash: string }>>`
+          SELECT id, email, name, password_hash
+          FROM users
+          WHERE LOWER(email) = LOWER(${credentials.email})
+          LIMIT 1
+        `
+        
+        const user = users[0] ? {
+          id: users[0].id,
+          email: users[0].email,
+          name: users[0].name,
+          passwordHash: users[0].password_hash,
+        } : null
 
         if (!user) {
           return null
