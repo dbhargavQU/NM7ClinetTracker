@@ -89,7 +89,7 @@ export function PaymentForm({
           disabled={loading}
         />
         <p className="text-xs text-muted-foreground">
-          The system will automatically assign this payment to the correct billing cycle based on your client's start date.
+          The system will automatically assign this payment to the correct billing cycle based on your client&apos;s start date.
         </p>
       </div>
 
