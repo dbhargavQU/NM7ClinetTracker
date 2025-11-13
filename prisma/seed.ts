@@ -6,8 +6,23 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Starting seed...')
 
-  // Create demo trainer
-  const passwordHash = await bcrypt.hash('password123', 10)
+  // Create friend's trainer account
+  const friendPasswordHash = await bcrypt.hash('Nameerisgay123', 10)
+  
+  const friend = await prisma.user.upsert({
+    where: { email: 'Project@nm7.com' },
+    update: {},
+    create: {
+      email: 'Project@nm7.com',
+      name: 'Project NM7',
+      passwordHash: friendPasswordHash,
+    },
+  })
+
+  console.log('✅ Created trainer:', friend.email)
+
+  // Create demo trainer (optional)
+  const demoPasswordHash = await bcrypt.hash('password123', 10)
   
   const trainer = await prisma.user.upsert({
     where: { email: 'trainer@example.com' },
@@ -15,16 +30,16 @@ async function main() {
     create: {
       email: 'trainer@example.com',
       name: 'Demo Trainer',
-      passwordHash,
+      passwordHash: demoPasswordHash,
     },
   })
 
-  console.log('✅ Created trainer:', trainer.email)
+  console.log('✅ Created demo trainer:', trainer.email)
 
-  // Create demo clients
+  // Create demo clients for friend
   const client1 = await prisma.client.create({
     data: {
-      userId: trainer.id,
+      userId: friend.id,
       name: 'John Doe',
       startDate: new Date('2024-01-15'),
       monthlyFee: 150.00,
@@ -36,7 +51,7 @@ async function main() {
 
   const client2 = await prisma.client.create({
     data: {
-      userId: trainer.id,
+      userId: friend.id,
       name: 'Jane Smith',
       startDate: new Date('2024-02-01'),
       monthlyFee: 200.00,
@@ -157,8 +172,9 @@ async function main() {
   console.log('✅ Created progress entries')
   console.log('🎉 Seed completed!')
   console.log('\n📧 Login credentials:')
-  console.log('   Email: trainer@example.com')
-  console.log('   Password: password123')
+  console.log('   Email: Project@nm7.com')
+  console.log('   Password: Nameerisgay123')
+  console.log('\n   (Demo account: trainer@example.com / password123)')
 }
 
 main()
