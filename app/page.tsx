@@ -16,7 +16,7 @@ interface ClientWithStatus {
   startDate: Date
   monthlyFee: number
   isActive: boolean
-  paymentStatus: 'Paid' | 'Not paid'
+  paymentStatus: 'Paid' | 'Partially paid' | 'Not paid'
   nextWorkout: string | null
 }
 

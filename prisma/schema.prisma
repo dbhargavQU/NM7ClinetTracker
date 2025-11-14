@@ -61,8 +61,8 @@ model WorkoutSchedule {
 model Payment {
   id        String   @id @default(cuid())
   clientId String   @map("client_id")
-  month     Int      // 1-12
-  year      Int
+  month     Int      // 1-12 (billing cycle month)
+  year      Int      // billing cycle year
   amount    Decimal  @db.Decimal(10, 2)
   paidOn    DateTime @map("paid_on")
   createdAt DateTime @default(now()) @map("created_at")
@@ -70,7 +70,7 @@ model Payment {
 
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
-  @@unique([clientId, month, year])
+  // Removed unique constraint to allow multiple payments per billing cycle (for partial payments)
   @@map("payments")
 }
 

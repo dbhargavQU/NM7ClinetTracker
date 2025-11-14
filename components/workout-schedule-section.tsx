@@ -48,12 +48,15 @@ export function WorkoutScheduleSection({
     }
   }
 
-  const handleFormSuccess = (newSchedule: WorkoutSchedule) => {
+  const handleFormSuccess = (newSchedule: WorkoutSchedule | WorkoutSchedule[]) => {
     if (editingId) {
-      setSchedules(schedules.map((s) => (s.id === editingId ? newSchedule : s)))
+      // Single schedule updated
+      setSchedules(schedules.map((s) => (s.id === editingId ? (newSchedule as WorkoutSchedule) : s)))
       setEditingId(null)
     } else {
-      setSchedules([...schedules, newSchedule])
+      // Multiple schedules created
+      const schedulesArray = Array.isArray(newSchedule) ? newSchedule : [newSchedule]
+      setSchedules([...schedules, ...schedulesArray])
     }
     setShowForm(false)
   }

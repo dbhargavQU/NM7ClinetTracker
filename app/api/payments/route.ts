@@ -55,24 +55,7 @@ export async function POST(request: Request) {
     const paidOnDate = new Date(paidOn)
     const { month, year } = getBillingCycleForDate(client.startDate, paidOnDate)
 
-    // Check if payment already exists for this billing cycle
-    const existing = await prisma.payment.findUnique({
-      where: {
-        clientId_month_year: {
-          clientId,
-          month,
-          year,
-        },
-      },
-    })
-
-    if (existing) {
-      return NextResponse.json(
-        { error: 'Payment already exists for this billing cycle' },
-        { status: 400 }
-      )
-    }
-
+    // Allow multiple payments per billing cycle to support partial payments
     const payment = await prisma.payment.create({
       data: {
         clientId,
@@ -86,12 +69,6 @@ export async function POST(request: Request) {
     return NextResponse.json(payment, { status: 201 })
   } catch (error: any) {
     console.error('Error creating payment:', error)
-    if (error.code === 'P2002') {
-      return NextResponse.json(
-        { error: 'Payment already exists for this billing cycle' },
-        { status: 400 }
-      )
-    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

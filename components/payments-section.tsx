@@ -32,10 +32,12 @@ const monthNames = [
 
 export function PaymentsSection({
   clientId,
+  clientName,
   monthlyFee,
   payments: initialPayments,
 }: {
   clientId: string
+  clientName?: string
   monthlyFee: number
   payments: Payment[]
 }) {
@@ -99,6 +101,7 @@ export function PaymentsSection({
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b">
+                      {clientName && <th className="text-left p-2 py-3">Client</th>}
                       <th className="text-left p-2 py-3">Month & Year</th>
                       <th className="text-left p-2 py-3">Amount</th>
                       <th className="text-left p-2 py-3">Paid On</th>
@@ -108,6 +111,11 @@ export function PaymentsSection({
                   <tbody>
                     {payments.map((payment) => (
                       <tr key={payment.id} className="border-b hover:bg-gray-50">
+                        {clientName && (
+                          <td className="p-2 py-3 font-medium">
+                            {clientName}
+                          </td>
+                        )}
                         <td className="p-2 py-3">
                           {monthNames[payment.month - 1]} {payment.year}
                         </td>

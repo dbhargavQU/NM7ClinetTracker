@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DateInput } from '@/components/ui/date-input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -97,15 +98,18 @@ export function ClientForm({ client }: { client?: Client }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="startDate">Start Date *</Label>
-            <Input
+            <Label htmlFor="startDate">Start Date * (DD/MM/YYYY)</Label>
+            <DateInput
               id="startDate"
-              type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(value) => setStartDate(value)}
               required
               disabled={loading}
+              placeholder="DD/MM/YYYY"
             />
+            <p className="text-xs text-muted-foreground">
+              Format: DD/MM/YYYY (e.g., 13/11/2025)
+            </p>
           </div>
 
           <div className="space-y-2">

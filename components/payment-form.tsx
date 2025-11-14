@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DateInput } from '@/components/ui/date-input'
 import { Label } from '@/components/ui/label'
 import { FormEvent, ChangeEvent } from 'react'
 
@@ -79,17 +80,17 @@ export function PaymentForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="paidOn">Paid On</Label>
-        <Input
+        <Label htmlFor="paidOn">Paid On (DD/MM/YYYY)</Label>
+        <DateInput
           id="paidOn"
-          type="date"
           value={paidOn}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setPaidOn(e.target.value)}
+          onChange={(value) => setPaidOn(value)}
           required
           disabled={loading}
+          placeholder="DD/MM/YYYY"
         />
         <p className="text-xs text-muted-foreground">
-          The system will automatically assign this payment to the correct billing cycle based on your client&apos;s start date.
+          Format: DD/MM/YYYY (e.g., 13/11/2025). The system will automatically assign this payment to the correct billing cycle based on your client&apos;s start date.
         </p>
       </div>
 

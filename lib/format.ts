@@ -36,16 +36,25 @@ export function formatTimeRange(startTime: string, endTime: string): string {
 }
 
 /**
- * Format date in IST timezone
+ * Format date in DD/MM/YYYY format (IST timezone)
  */
 export function formatDateIST(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
-  return dateObj.toLocaleDateString('en-IN', {
+  
+  // Use Intl.DateTimeFormat to get date parts in IST timezone
+  const formatter = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
   })
+  
+  const parts = formatter.formatToParts(dateObj)
+  const day = parts.find(p => p.type === 'day')?.value || ''
+  const month = parts.find(p => p.type === 'month')?.value || ''
+  const year = parts.find(p => p.type === 'year')?.value || ''
+  
+  return `${day}/${month}/${year}`
 }
 
 /**

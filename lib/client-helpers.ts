@@ -2,7 +2,9 @@ import { prisma } from './prisma'
 import { formatTimeRange } from './format'
 
 export interface PaymentStatusInfo {
-  status: 'Paid' | 'Not paid'
+  status: 'Paid' | 'Partially paid' | 'Not paid'
+  amountPaid?: number // Total amount paid in current billing cycle
+  remainingBalance?: number // Remaining balance to be paid
   expiresAt?: Date // End of the current billing cycle (if paid)
   daysRemaining?: number // Days until expiry
   isExpired?: boolean // Whether payment has expired
@@ -49,10 +51,10 @@ function getCurrentBillingCycle(startDate: Date, now: Date = new Date()) {
 }
 
 /**
- * Check if a payment exists for the current billing cycle
+ * Get all payments for the current billing cycle and calculate total amount
  * We check if payment was made during the billing cycle period
  */
-async function getPaymentForBillingCycle(
+async function getPaymentsForBillingCycle(
   clientId: string,
   userId: string,
   cycleStart: Date,
@@ -72,26 +74,30 @@ async function getPaymentForBillingCycle(
     ],
   })
 
-  // Check if any payment was made during the billing cycle period
+  // Filter payments made during the billing cycle period
   // Payment's paidOn date should fall within cycleStart and cycleEnd
-  for (const payment of payments) {
+  const cyclePayments = payments.filter((payment) => {
     const paidOnDate = new Date(payment.paidOn)
     paidOnDate.setHours(0, 0, 0, 0)
-    
-    // Check if payment was made during this billing cycle
-    if (paidOnDate >= cycleStart && paidOnDate <= cycleEnd) {
-      return payment
-    }
-  }
+    return paidOnDate >= cycleStart && paidOnDate <= cycleEnd
+  })
 
-  return null
+  // Calculate total amount paid in this cycle
+  const totalPaid = cyclePayments.reduce((sum, payment) => {
+    return sum + Number(payment.amount)
+  }, 0)
+
+  return {
+    payments: cyclePayments,
+    totalPaid,
+  }
 }
 
 export async function getCurrentMonthPaymentStatus(
   clientId: string,
   userId: string
-): Promise<'Paid' | 'Not paid'> {
-  // Get client to access start date
+): Promise<'Paid' | 'Partially paid' | 'Not paid'> {
+  // Get client to access start date and monthly fee
   const client = await prisma.client.findFirst({
     where: {
       id: clientId,
@@ -104,16 +110,23 @@ export async function getCurrentMonthPaymentStatus(
   }
 
   const { cycleStart, cycleEnd } = getCurrentBillingCycle(client.startDate)
-  const payment = await getPaymentForBillingCycle(clientId, userId, cycleStart, cycleEnd)
+  const { totalPaid } = await getPaymentsForBillingCycle(clientId, userId, cycleStart, cycleEnd)
+  const monthlyFee = Number(client.monthlyFee)
 
-  return payment ? 'Paid' : 'Not paid'
+  if (totalPaid >= monthlyFee) {
+    return 'Paid'
+  } else if (totalPaid > 0) {
+    return 'Partially paid'
+  } else {
+    return 'Not paid'
+  }
 }
 
 export async function getPaymentStatusWithExpiry(
   clientId: string,
   userId: string
 ): Promise<PaymentStatusInfo> {
-  // Get client to access start date
+  // Get client to access start date and monthly fee
   const client = await prisma.client.findFirst({
     where: {
       id: clientId,
@@ -130,26 +143,42 @@ export async function getPaymentStatusWithExpiry(
   const now = new Date()
   const { cycleStart, cycleEnd } = getCurrentBillingCycle(client.startDate, now)
   
-  const payment = await getPaymentForBillingCycle(clientId, userId, cycleStart, cycleEnd)
+  const { totalPaid } = await getPaymentsForBillingCycle(clientId, userId, cycleStart, cycleEnd)
+  const monthlyFee = Number(client.monthlyFee)
+  const remainingBalance = Math.max(0, monthlyFee - totalPaid)
 
-  if (!payment) {
+  // Determine status based on payment amount
+  let status: 'Paid' | 'Partially paid' | 'Not paid'
+  if (totalPaid >= monthlyFee) {
+    status = 'Paid'
+  } else if (totalPaid > 0) {
+    status = 'Partially paid'
+  } else {
+    status = 'Not paid'
+  }
+
+  // Only show expiry info if fully paid
+  if (status === 'Paid') {
+    const expiresAt = cycleEnd
+    const daysRemaining = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const isExpired = daysRemaining < 0
+
     return {
-      status: 'Not paid',
+      status,
+      amountPaid: totalPaid,
+      remainingBalance: 0,
+      expiresAt,
+      daysRemaining: Math.max(0, daysRemaining),
+      isExpired,
       billingCycleStart: cycleStart,
       billingCycleEnd: cycleEnd,
     }
   }
 
-  // Calculate expiry date (end of current billing cycle)
-  const expiresAt = cycleEnd
-  const daysRemaining = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  const isExpired = daysRemaining < 0
-
   return {
-    status: 'Paid',
-    expiresAt,
-    daysRemaining: Math.max(0, daysRemaining),
-    isExpired,
+    status,
+    amountPaid: totalPaid,
+    remainingBalance,
     billingCycleStart: cycleStart,
     billingCycleEnd: cycleEnd,
   }

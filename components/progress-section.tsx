@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Trash2 } from 'lucide-react'
 import { ProgressForm } from './progress-form'
 import { ProgressChart } from './progress-chart'
+import { formatDateIST } from '@/lib/format'
 
 interface ProgressEntry {
   id: string
@@ -72,7 +73,7 @@ export function ProgressSection({
       .map((e) => ({
         date: new Date(e.date).toISOString().split('T')[0],
         weight: e.weightKg,
-        label: new Date(e.date).toLocaleDateString(),
+        label: formatDateIST(e.date),
       })),
   ]
 
@@ -149,7 +150,7 @@ export function ProgressSection({
                       {entries.map((entry) => (
                         <tr key={entry.id} className="border-b hover:bg-gray-50">
                           <td className="p-2 py-3">
-                            {new Date(entry.date).toLocaleDateString()}
+                            {formatDateIST(entry.date)}
                           </td>
                           <td className="p-2 py-3 font-medium">{entry.weightKg} kg</td>
                           <td className="p-2 py-3 text-sm text-gray-600">

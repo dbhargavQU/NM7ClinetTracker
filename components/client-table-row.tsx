@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
-import { formatCurrency } from '@/lib/format'
+import { formatCurrency, formatDateIST } from '@/lib/format'
 
 interface ClientWithStatus {
   id: string
@@ -13,7 +13,7 @@ interface ClientWithStatus {
   startDate: Date
   monthlyFee: number
   isActive: boolean
-  paymentStatus: 'Paid' | 'Not paid'
+  paymentStatus: 'Paid' | 'Partially paid' | 'Not paid'
   nextWorkout: string | null
 }
 
@@ -62,7 +62,7 @@ export function ClientTableRow({ client }: { client: ClientWithStatus }) {
         </Link>
       </td>
       <td className="p-2 py-3">
-        {new Date(client.startDate).toLocaleDateString()}
+        {formatDateIST(client.startDate)}
       </td>
       <td className="p-2 py-3">{formatCurrency(client.monthlyFee)}</td>
       <td className="p-2 py-3">
@@ -70,6 +70,8 @@ export function ClientTableRow({ client }: { client: ClientWithStatus }) {
           className={`px-2 py-1 rounded text-sm ${
             client.paymentStatus === 'Paid'
               ? 'bg-green-100 text-green-800'
+              : client.paymentStatus === 'Partially paid'
+              ? 'bg-yellow-100 text-yellow-800'
               : 'bg-red-100 text-red-800'
           }`}
         >

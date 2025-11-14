@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DateInput } from '@/components/ui/date-input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -64,15 +65,18 @@ export function ProgressForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
-        <Input
+        <Label htmlFor="date">Date (DD/MM/YYYY)</Label>
+        <DateInput
           id="date"
-          type="date"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(value) => setDate(value)}
           required
           disabled={loading}
+          placeholder="DD/MM/YYYY"
         />
+        <p className="text-xs text-muted-foreground">
+          Format: DD/MM/YYYY (e.g., 13/11/2025)
+        </p>
       </div>
 
       <div className="space-y-2">

@@ -134,6 +134,27 @@ export default async function ClientDetailPage({
                         </p>
                       )}
                     </>
+                  ) : paymentStatusInfo.status === 'Partially paid' ? (
+                    <>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        ⚠️ Partially Paid
+                      </span>
+                      {paymentStatusInfo.amountPaid !== undefined && paymentStatusInfo.remainingBalance !== undefined && (
+                        <>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Paid: {formatCurrency(paymentStatusInfo.amountPaid)} / {formatCurrency(Number(client.monthlyFee))}
+                          </p>
+                          <p className="text-xs font-medium text-orange-600 dark:text-orange-400 mt-1">
+                            Remaining Balance: {formatCurrency(paymentStatusInfo.remainingBalance)}
+                          </p>
+                        </>
+                      )}
+                      {paymentStatusInfo.billingCycleStart && paymentStatusInfo.billingCycleEnd && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Cycle: {formatDateIST(paymentStatusInfo.billingCycleStart)} - {formatDateIST(paymentStatusInfo.billingCycleEnd)}
+                        </p>
+                      )}
+                    </>
                   ) : (
                     <>
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
@@ -144,6 +165,9 @@ export default async function ClientDetailPage({
                           Cycle: {formatDateIST(paymentStatusInfo.billingCycleStart)} - {formatDateIST(paymentStatusInfo.billingCycleEnd)}
                         </p>
                       )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Amount Due: {formatCurrency(Number(client.monthlyFee))}
+                      </p>
                     </>
                   )}
                 </div>
@@ -164,6 +188,7 @@ export default async function ClientDetailPage({
         {/* Payments */}
         <PaymentsSection
           clientId={client.id}
+          clientName={client.name}
           monthlyFee={Number(client.monthlyFee)}
           payments={client.payments.map(payment => ({
             ...payment,
