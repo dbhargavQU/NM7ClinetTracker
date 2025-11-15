@@ -3,7 +3,7 @@
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { LogOut, Users, Home, Calendar } from 'lucide-react'
+import { LogOut, Users, Home, Calendar, Wallet } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -24,14 +24,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Users className="h-5 w-5" />
                 <span>Clients</span>
               </Link>
-              <Link
-                href="/availability"
-                className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Calendar className="h-5 w-5" />
-                <span>Availability</span>
-              </Link>
-            </div>
+                      <Link
+                        href="/availability"
+                        className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Calendar className="h-5 w-5" />
+                        <span>Availability</span>
+                      </Link>
+                      <Link
+                        href="/bank"
+                        className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Wallet className="h-5 w-5" />
+                        <span>Bank</span>
+                      </Link>
+                    </div>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
               <Button

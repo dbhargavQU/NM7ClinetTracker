@@ -11,12 +11,12 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   name         String
-  email        String    @unique
-  passwordHash String    @map("password_hash")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   clients Client[]
 
@@ -24,51 +24,51 @@ model User {
 }
 
 model Client {
-  id              String    @id @default(cuid())
-  userId          String    @map("user_id")
-  name            String
-  startDate       DateTime  @map("start_date")
-  monthlyFee      Decimal   @map("monthly_fee") @db.Decimal(10, 2)
-  isActive        Boolean   @default(true) @map("is_active")
+  id               String   @id @default(cuid())
+  userId           String   @map("user_id")
+  name             String
+  startDate        DateTime @map("start_date")
+  monthlyFee       Decimal  @map("monthly_fee") @db.Decimal(10, 2)
+  isActive         Boolean  @default(true) @map("is_active")
   startingWeightKg Float?   @map("starting_weight_kg") @db.DoublePrecision
-  notes           String?   @db.Text
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   workoutSchedules WorkoutSchedule[]
-  payments        Payment[]
-  progressEntries ProgressEntry[]
+  payments         Payment[]
+  progressEntries  ProgressEntry[]
 
   @@map("clients")
 }
 
 model WorkoutSchedule {
-  id          String   @id @default(cuid())
-  clientId    String   @map("client_id")
-  dayOfWeek   Int      @map("day_of_week") // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  startTime   String   @map("start_time") // Format: "HH:mm"
-  endTime     String   @map("end_time") // Format: "HH:mm"
-  location    String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(cuid())
+  clientId  String   @map("client_id")
+  dayOfWeek Int      @map("day_of_week") // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime String   @map("start_time") // Format: "HH:mm"
+  endTime   String   @map("end_time") // Format: "HH:mm"
+  location  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("workout_schedules")
 }
 
 model Payment {
   id        String   @id @default(cuid())
-  clientId String   @map("client_id")
-  month     Int      // 1-12 (billing cycle month)
-  year      Int      // billing cycle year
+  clientId  String   @map("client_id")
+  month     Int // 1-12 (billing cycle month)
+  year      Int // billing cycle year
   amount    Decimal  @db.Decimal(10, 2)
   paidOn    DateTime @map("paid_on")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   // Removed unique constraint to allow multiple payments per billing cycle (for partial payments)
   @@map("payments")
@@ -83,8 +83,7 @@ model ProgressEntry {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("progress_entries")
 }
-
