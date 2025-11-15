@@ -30,26 +30,19 @@ function getBookingsForDay(dayOfWeek: number, bookedSlots: TimeSlot[]): TimeSlot
     .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
 }
 
-// Check if a time slot is part of a booking
-function getBookingForSlot(
+// Get all bookings that start at a specific time slot
+function getBookingsStartingAtSlot(
   timeSlot: string,
   dayOfWeek: number,
   bookedSlots: TimeSlot[]
-): TimeSlot | null {
+): TimeSlot[] {
   const slotMinutes = timeToMinutes(timeSlot)
-  const nextSlotMinutes = slotMinutes + 30
-
-  for (const booking of bookedSlots) {
-    if (booking.dayOfWeek !== dayOfWeek) continue
-
+  
+  return bookedSlots.filter((booking) => {
+    if (booking.dayOfWeek !== dayOfWeek) return false
     const bookingStart = timeToMinutes(booking.startTime)
-    const bookingEnd = timeToMinutes(booking.endTime)
-
-    if (slotMinutes >= bookingStart && slotMinutes < bookingEnd) {
-      return booking
-    }
-  }
-  return null
+    return slotMinutes === bookingStart
+  })
 }
 
 export default async function AvailabilityPage() {
@@ -174,56 +167,78 @@ export default async function AvailabilityPage() {
                         key={dayIndex}
                         className="border-r border-border last:border-r-0 relative"
                       >
+                        {/* Render all bookings for this day */}
+                        {dayBookings.map((booking, bookingIndex) => {
+                          const bookingStart = timeToMinutes(booking.startTime)
+                          const bookingEnd = timeToMinutes(booking.endTime)
+                          const bookingDuration = bookingEnd - bookingStart
+                          const topPosition = ((bookingStart - 360) / 30) * 30
+                          const height = Math.max(30, (bookingDuration / 30) * 30)
+                          
+                          // Check for overlapping bookings at the same start time
+                          const overlappingBookings = dayBookings.filter((b) => {
+                            const bStart = timeToMinutes(b.startTime)
+                            return bStart === bookingStart
+                          })
+                          
+                          const totalOverlapping = overlappingBookings.length
+                          const indexInOverlap = overlappingBookings.findIndex((b) => b === booking)
+                          const widthPercent = 100 / totalOverlapping
+                          const leftPercent = (indexInOverlap * widthPercent)
+                          
+                          const colorIndex = booking.clientName.charCodeAt(0) % bookingColors.length
+                          const colorClass = bookingColors[colorIndex]
+
+                          return (
+                            <div
+                              key={`${booking.clientName}-${booking.startTime}-${bookingIndex}`}
+                              className={`${colorClass} rounded-sm m-1 p-2 shadow-sm hover:shadow-md transition-all cursor-pointer`}
+                              style={{
+                                position: 'absolute',
+                                top: `${topPosition}px`,
+                                left: `${leftPercent + 0.5}%`,
+                                width: `${widthPercent - 1}%`,
+                                height: `${height}px`,
+                                zIndex: 10,
+                              }}
+                            >
+                              <div className="text-xs font-semibold truncate mb-0.5">
+                                {booking.clientName}
+                              </div>
+                              <div className="text-[10px] opacity-80 truncate">
+                                {formatTimeIST(booking.startTime)} - {formatTimeIST(booking.endTime)}
+                              </div>
+                              {booking.location && (
+                                <div className="text-[10px] opacity-60 mt-0.5 truncate">
+                                  📍 {booking.location}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                        
+                        {/* Render time slot grid for empty slots */}
                         {timeSlots.map((timeSlot) => {
                           const [hours, minutes] = timeSlot.split(':').map(Number)
                           const isHourMark = minutes === 0
                           const slotMinutes = timeToMinutes(timeSlot)
-                          const booking = getBookingForSlot(timeSlot, dayIndex, bookedSlots)
-                          const isBookingStart = booking && timeToMinutes(booking.startTime) === slotMinutes
-
-                          if (isBookingStart && booking) {
-                            const bookingDuration = timeToMinutes(booking.endTime) - timeToMinutes(booking.startTime)
-                            const rowSpan = Math.max(1, Math.ceil(bookingDuration / 30))
-                            const colorIndex = booking.clientName.charCodeAt(0) % bookingColors.length
-                            const colorClass = bookingColors[colorIndex]
-
+                          
+                          // Check if any booking starts at this slot
+                          const bookingsAtSlot = getBookingsStartingAtSlot(timeSlot, dayIndex, bookedSlots)
+                          
+                          // Only render empty slot if no bookings start here
+                          if (bookingsAtSlot.length === 0) {
                             return (
                               <div
                                 key={timeSlot}
-                                className={`${colorClass} rounded-sm m-1 p-2 shadow-sm hover:shadow-md transition-all cursor-pointer`}
-                                style={{
-                                  position: 'absolute',
-                                  top: `${((slotMinutes - 360) / 30) * 30}px`,
-                                  left: '4px',
-                                  right: '4px',
-                                  height: `${Math.max(30, bookingDuration / 30 * 30)}px`,
-                                  zIndex: 10,
-                                }}
-                              >
-                                <div className="text-xs font-semibold truncate mb-0.5">
-                                  {booking.clientName}
-                                </div>
-                                <div className="text-[10px] opacity-80 truncate">
-                                  {formatTimeIST(booking.startTime)} - {formatTimeIST(booking.endTime)}
-                                </div>
-                                {booking.location && (
-                                  <div className="text-[10px] opacity-60 mt-0.5 truncate">
-                                    📍 {booking.location}
-                                  </div>
-                                )}
-                              </div>
+                                className={`border-b border-border/30 min-h-[30px] hover:bg-muted/20 transition-colors ${
+                                  isHourMark ? 'border-b-2' : ''
+                                }`}
+                              ></div>
                             )
                           }
-
-                          // Empty slot
-                          return (
-                            <div
-                              key={timeSlot}
-                              className={`border-b border-border/30 min-h-[30px] hover:bg-muted/20 transition-colors ${
-                                isHourMark ? 'border-b-2' : ''
-                              }`}
-                            ></div>
-                          )
+                          
+                          return null
                         })}
                       </div>
                     )
