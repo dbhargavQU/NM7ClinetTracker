@@ -1,0 +1,43 @@
+{
+  "name": "NM7 Client Tracker",
+  "short_name": "NM7 Tracker",
+  "description": "Personal Trainer Client Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "productivity", "business"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Add Payment",
+      "short_name": "Payment",
+      "description": "Quickly add a new payment",
+      "url": "/clients?action=add-payment",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Bank",
+      "short_name": "Bank",
+      "description": "View earnings and payments",
+      "url": "/bank",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+
