@@ -26,16 +26,32 @@ export function PaymentForm({
   onSuccess: (payment: Payment) => void
   onCancel: () => void
 }) {
-  const now = new Date()
+  const getTodayDate = () => new Date().toISOString().split('T')[0]
   const [amount, setAmount] = useState(monthlyFee.toString())
-  const [paidOn, setPaidOn] = useState(now.toISOString().split('T')[0])
+  const [paidOn, setPaidOn] = useState(getTodayDate())
   const [loading, setLoading] = useState(false)
+  const [formKey, setFormKey] = useState(0) // Key to force remount on reset
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
 
     try {
+      // Validate amount
+      const amountNum = parseFloat(amount)
+      if (isNaN(amountNum) || amountNum <= 0) {
+        alert('Please enter a valid amount greater than 0')
+        setLoading(false)
+        return
+      }
+
+      // Validate date - DateInput returns ISO format (YYYY-MM-DD)
+      if (!paidOn || paidOn.trim() === '') {
+        alert('Please enter a valid date')
+        setLoading(false)
+        return
+      }
+
       const response = await fetch('/api/payments', {
         method: 'POST',
         headers: {
@@ -43,21 +59,41 @@ export function PaymentForm({
         },
         body: JSON.stringify({
           clientId,
-          amount: parseFloat(amount),
-          paidOn: new Date(paidOn).toISOString(),
+          amount: amountNum,
+          paidOn: paidOn, // DateInput already returns ISO format (YYYY-MM-DD)
         }),
       })
 
       if (!response.ok) {
         const data = await response.json()
-        alert(data.error || 'Failed to save payment')
+        const errorMessage = data.error || `Failed to save payment (Status: ${response.status})`
+        console.error('Payment API error:', {
+          status: response.status,
+          error: data.error,
+          body: { clientId, amount: amountNum, paidOn },
+        })
+        alert(errorMessage)
+        setLoading(false)
         return
       }
 
       const data = await response.json()
+      
+      // Reset form before calling onSuccess to ensure clean state
+      const today = getTodayDate()
+      setAmount(monthlyFee.toString())
+      setPaidOn(today)
+      setFormKey(prev => prev + 1) // Force form remount to clear any stale state
+      
       onSuccess(data)
-    } catch (error) {
-      alert('An error occurred')
+    } catch (error: any) {
+      console.error('Payment submission error:', error)
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        body: { clientId, amount, paidOn },
+      })
+      alert(error.message || 'An error occurred while saving the payment. Please check the console for details.')
     } finally {
       setLoading(false)
     }
@@ -82,6 +118,7 @@ export function PaymentForm({
       <div className="space-y-2">
         <Label htmlFor="paidOn">Paid On (DD/MM/YYYY)</Label>
         <DateInput
+          key={`paidOn-${formKey}`}
           id="paidOn"
           value={paidOn}
           onChange={(value) => setPaidOn(value)}

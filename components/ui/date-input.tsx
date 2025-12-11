@@ -19,12 +19,16 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     // Convert ISO date (YYYY-MM-DD) to DD/MM/YYYY for display
     const formatForDisplay = (isoDate: string): string => {
       if (!isoDate) return ''
-      const date = new Date(isoDate + 'T00:00:00') // Add time to avoid timezone issues
+      // Parse YYYY-MM-DD as UTC to avoid timezone shifts
+      const [year, month, day] = isoDate.split('-').map(Number)
+      if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+        return ''
+      }
+      // Validate the date
+      const date = new Date(Date.UTC(year, month - 1, day))
       if (isNaN(date.getTime())) return ''
-      const day = date.getDate().toString().padStart(2, '0')
-      const month = (date.getMonth() + 1).toString().padStart(2, '0')
-      const year = date.getFullYear()
-      return `${day}/${month}/${year}`
+      // Format as DD/MM/YYYY using the original values to avoid timezone issues
+      return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`
     }
 
     // Convert DD/MM/YYYY to ISO format (YYYY-MM-DD)
