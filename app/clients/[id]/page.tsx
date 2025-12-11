@@ -62,22 +62,24 @@ export default async function ClientDetailPage({
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">{client.name}</h1>
-            <p className="text-muted-foreground mt-1">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold">{client.name}</h1>
+            <p className="text-muted-foreground mt-1 text-sm md:text-base">
               Client since {formatDateIST(client.startDate)}
             </p>
           </div>
-          <div className="flex items-center space-x-3">
-            <Link href={`/clients/${client.id}/edit`}>
-              <Button variant="outline">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-3">
+            <Link href={`/clients/${client.id}/edit`} className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Client
               </Button>
             </Link>
-            <DeleteClientButton clientId={client.id} clientName={client.name} />
+            <div className="w-full sm:w-auto">
+              <DeleteClientButton clientId={client.id} clientName={client.name} />
+            </div>
           </div>
         </div>
 

@@ -95,48 +95,81 @@ export function PaymentsSection({
         ) : (
           <>
             {payments.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No payments recorded</p>
+              <p className="text-muted-foreground text-center py-4">No payments recorded</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b">
-                      {clientName && <th className="text-left p-2 py-3">Client</th>}
-                      <th className="text-left p-2 py-3">Month & Year</th>
-                      <th className="text-left p-2 py-3">Amount</th>
-                      <th className="text-left p-2 py-3">Paid On</th>
-                      <th className="text-left p-2 py-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {payments.map((payment) => (
-                      <tr key={payment.id} className="border-b hover:bg-gray-50">
-                        {clientName && (
-                          <td className="p-2 py-3 font-medium">
-                            {clientName}
-                          </td>
-                        )}
-                        <td className="p-2 py-3">
-                          {monthNames[payment.month - 1]} {payment.year}
-                        </td>
-                        <td className="p-2 py-3">{formatCurrency(payment.amount)}</td>
-                        <td className="p-2 py-3">
-                          {formatDateIST(payment.paidOn)}
-                        </td>
-                        <td className="p-2 py-3">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(payment.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </td>
+              <>
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
+                  {payments.map((payment) => (
+                    <div
+                      key={payment.id}
+                      className="border border-border rounded-lg p-4 space-y-2"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="font-semibold text-sm text-muted-foreground">
+                            {monthNames[payment.month - 1]} {payment.year}
+                          </p>
+                          <p className="text-lg font-bold">{formatCurrency(payment.amount)}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Paid on {formatDateIST(payment.paidOn)}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(payment.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-border">
+                        {clientName && <th className="text-left p-2 py-3">Client</th>}
+                        <th className="text-left p-2 py-3">Month & Year</th>
+                        <th className="text-left p-2 py-3">Amount</th>
+                        <th className="text-left p-2 py-3">Paid On</th>
+                        <th className="text-left p-2 py-3">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {payments.map((payment) => (
+                        <tr key={payment.id} className="border-b border-border hover:bg-muted/50">
+                          {clientName && (
+                            <td className="p-2 py-3 font-medium">
+                              {clientName}
+                            </td>
+                          )}
+                          <td className="p-2 py-3">
+                            {monthNames[payment.month - 1]} {payment.year}
+                          </td>
+                          <td className="p-2 py-3">{formatCurrency(payment.amount)}</td>
+                          <td className="p-2 py-3">
+                            {formatDateIST(payment.paidOn)}
+                          </td>
+                          <td className="p-2 py-3">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(payment.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </>
         )}
