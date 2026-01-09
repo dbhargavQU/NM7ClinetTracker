@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { formatCurrency, formatDateIST } from '@/lib/format'
+import { ToggleClientStatusButton } from '@/components/toggle-client-status-button'
 
 interface ClientWithStatus {
   id: string
@@ -93,15 +94,25 @@ export function ClientTableRow({ client }: { client: ClientWithStatus }) {
         </span>
       </td>
       <td className="p-2 py-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleDelete}
-          disabled={loading}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <ToggleClientStatusButton
+            clientId={client.id}
+            clientName={client.name}
+            isActive={client.isActive}
+            variant="ghost"
+            size="sm"
+            showIcon={false}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDelete}
+            disabled={loading}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </td>
     </tr>
   )

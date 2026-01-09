@@ -12,6 +12,7 @@ import { WorkoutScheduleSection } from '@/components/workout-schedule-section'
 import { PaymentsSection } from '@/components/payments-section'
 import { ProgressSection } from '@/components/progress-section'
 import { DeleteClientButton } from '@/components/delete-client-button'
+import { ToggleClientStatusButton } from '@/components/toggle-client-status-button'
 
 export default async function ClientDetailPage({
   params,
@@ -77,6 +78,14 @@ export default async function ClientDetailPage({
                 Edit Client
               </Button>
             </Link>
+            <div className="w-full sm:w-auto">
+              <ToggleClientStatusButton
+                clientId={client.id}
+                clientName={client.name}
+                isActive={client.isActive}
+                variant="outline"
+              />
+            </div>
             <div className="w-full sm:w-auto">
               <DeleteClientButton clientId={client.id} clientName={client.name} />
             </div>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Trash2, Calendar, DollarSign, CreditCard, User } from 'lucide-react'
 import { formatCurrency, formatDateIST } from '@/lib/format'
+import { ToggleClientStatusButton } from '@/components/toggle-client-status-button'
 
 interface ClientWithStatus {
   id: string
@@ -71,15 +72,25 @@ export function ClientCard({ client }: { client: ClientWithStatus }) {
               {client.name}
             </h3>
           </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDelete}
-            disabled={loading}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-1">
+            <ToggleClientStatusButton
+              clientId={client.id}
+              clientName={client.name}
+              isActive={client.isActive}
+              variant="ghost"
+              size="sm"
+              showIcon={false}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDelete}
+              disabled={loading}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-2">

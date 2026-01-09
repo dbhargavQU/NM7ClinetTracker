@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus } from 'lucide-react'
 import { ClientTableRow } from '@/components/client-table-row'
 import { ClientCard } from '@/components/client-card'
+import { ClientFilterTabs } from '@/components/client-filter-tabs'
 
 interface ClientWithStatus {
   id: string
@@ -21,12 +22,18 @@ interface ClientWithStatus {
   nextWorkout: string | null
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: { filter?: string }
+}) {
   const user = await requireAuth()
+  const filter = searchParams?.filter || 'active'
 
   const clients = await prisma.client.findMany({
     where: {
       userId: user.id,
+      ...(filter === 'active' ? { isActive: true } : filter === 'past' ? { isActive: false } : {}),
     },
     orderBy: {
       name: 'asc',
@@ -50,6 +57,14 @@ export default async function DashboardPage() {
     })
   )
 
+  // Get counts for tabs
+  const allClients = await prisma.client.findMany({
+    where: { userId: user.id },
+    select: { isActive: true },
+  })
+  const activeCount = allClients.filter(c => c.isActive).length
+  const pastCount = allClients.filter(c => !c.isActive).length
+
   return (
     <Layout>
       <div className="space-y-4 md:space-y-6">
@@ -65,15 +80,24 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Clients</CardTitle>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <CardTitle>Clients</CardTitle>
+              <ClientFilterTabs activeFilter={filter} activeCount={activeCount} pastCount={pastCount} />
+            </div>
           </CardHeader>
           <CardContent>
             {clientsWithStatus.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <p>No clients yet. Add your first client to get started.</p>
-                <Link href="/clients/new" className="mt-4 inline-block">
-                  <Button>Add Client</Button>
-                </Link>
+                <p>
+                  {filter === 'active' 
+                    ? 'No active clients yet. Add your first client to get started.'
+                    : 'No past clients yet.'}
+                </p>
+                {filter === 'active' && (
+                  <Link href="/clients/new" className="mt-4 inline-block">
+                    <Button>Add Client</Button>
+                  </Link>
+                )}
               </div>
             ) : (
               <>
