@@ -18,10 +18,14 @@ export interface FreeSlot {
 
 /**
  * Get all booked time slots for a trainer
+ * Only includes active clients - inactive clients are excluded from the calendar
  */
 export async function getBookedSlots(userId: string): Promise<TimeSlot[]> {
   const clients = await prisma.client.findMany({
-    where: { userId },
+    where: { 
+      userId,
+      isActive: true, // Only include active clients in the availability calendar
+    },
     include: {
       workoutSchedules: true,
     },
