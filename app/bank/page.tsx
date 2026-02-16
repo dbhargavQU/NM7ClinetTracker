@@ -1,3 +1,4 @@
+// Bank & Earnings page
 import { requireAuth } from '@/lib/auth-helpers'
 import { prisma } from '@/lib/prisma'
 import { formatCurrency, formatDateIST } from '@/lib/format'
