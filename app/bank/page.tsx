@@ -187,7 +187,7 @@ export default async function BankPage({
                       <div>
                         <p className="font-medium">Estimated from Active Clients</p>
                         <p className="text-sm text-muted-foreground">
-                          Sum of all active clients' monthly fees
+                          Sum of all active clients&apos; monthly fees
                         </p>
                       </div>
                       <p className="text-xl font-bold">{formatCurrency(estimatedMonthlyEarnings)}</p>
